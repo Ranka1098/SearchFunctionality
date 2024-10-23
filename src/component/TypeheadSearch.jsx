@@ -24,7 +24,16 @@ const TypeheadSearch = () => {
         setState(STATUS.ERROR);
       }
     };
-    getData();
+    // getData();
+    // note -getData function jo har keyStroke per call ho raha tha ab wo 1 second dealy kestroke ke baad call hoga
+    const timerId = setTimeout(getData, 1000);
+
+    // cleanup - agar phele keystoke ke 1 second ke baad jo api call ho rahi thi usse phele user 2nd keystroke de diya
+    // to jo phele keystroke pe api call na ho kar akhri wale keystroke per api call ho gi
+    // network tab me jaakar check karo
+    return () => {
+      clearTimeout(timerId);
+    };
   }, [queary]);
 
   return (
