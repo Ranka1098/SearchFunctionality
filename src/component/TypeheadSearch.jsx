@@ -11,17 +11,26 @@ const TypeheadSearch = () => {
   const [data, setData] = useState([]);
   const [state, setState] = useState(STATUS.LOADING);
   useEffect(() => {
+    // abort instance created
+    const abortController = new AbortController();
+    // abort controller ke sath signal bhi aat hai
+    const { signal } = abortController;
+
     const getData = async () => {
       try {
         setState(STATUS.LOADING);
+        // jo abrot controller se singnal aaya tha usse api link ke saath bind kar diya
         const resp = await fetch(
-          `https://dummyjson.com/products/search?q=${queary}&limit=10`
+          `https://dummyjson.com/products/search?q=${queary}&limit=10`,
+          { signal }
         );
         const result = await resp.json();
         setData(result.products);
         setState(STATUS.SUCCESS);
       } catch (error) {
-        setState(STATUS.ERROR);
+        if (error.name !== "AbortError") {
+          setState(STATUS.ERROR);
+        }
       }
     };
     // getData();
@@ -32,7 +41,10 @@ const TypeheadSearch = () => {
     // to jo phele keystroke pe api call na ho kar akhri wale keystroke per api call ho gi
     // network tab me jaakar check karo
     return () => {
+      // privious keystroke ko clean up karo
       clearTimeout(timerId);
+      // cleanup ke saath hi privious network call ko abort karo
+      abortController.abort();
     };
   }, [queary]);
 
